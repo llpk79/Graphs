@@ -58,14 +58,18 @@ class SocialGraph:
             self.add_user(i)
         # Create friendships
         count = 0
-        for user in self.users:
-            num = random.randint(0, avg_friendships)
-            for _ in range(num):
-                # friend = random.choice(self.users).name
+        friendships = (num_users * avg_friendships) // 2
+        # print('friendships', friendships)
+        for _ in range(friendships):
+            while True:
+                user = random.randint(0, self.last_id - 1)
                 friend = random.randint(0, self.last_id - 1)
-
-                self.add_friendship(user, friend)
-                count += 1
+                if (friend != user
+                        and friend not in self.friendships[user]
+                        and user not in self.friendships[friend]):
+                    break
+            self.add_friendship(user, friend)
+            count += 1
         # print(count)
         # friends = []
         # for x in self.friendships.values():
