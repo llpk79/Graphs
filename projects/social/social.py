@@ -1,8 +1,14 @@
+import random
+from collections import deque
 
 
 class User:
     def __init__(self, name):
         self.name = name
+
+    def __repr__(self):
+        return f"User({repr(self.name)})"
+
 
 class SocialGraph:
     def __init__(self):
@@ -26,11 +32,11 @@ class SocialGraph:
         """
         Create a new user with a sequential integer ID
         """
-        self.last_id += 1  # automatically increment the ID to assign the new user
         self.users[self.last_id] = User(name)
         self.friendships[self.last_id] = set()
+        self.last_id += 1  # automatically increment the ID to assign the new user
 
-    def populate_graph(self, numUsers, avgFriendships):
+    def populate_graph(self, num_users, avg_friendships):
         """
         Takes a number of users and an average number of friendships
         as arguments
@@ -44,11 +50,27 @@ class SocialGraph:
         self.last_id = 0
         self.users = {}
         self.friendships = {}
-        # !!!! IMPLEMENT ME
-
+        if num_users <= avg_friendships:
+            print("Warning! num_users must be greater than avg_friendships.")
+            return
         # Add users
-
+        for i in range(num_users):
+            self.add_user(i)
         # Create friendships
+        count = 0
+        for user in self.users:
+            num = random.randint(0, avg_friendships)
+            for _ in range(num):
+                # friend = random.choice(self.users).name
+                friend = random.randint(0, self.last_id - 1)
+
+                self.add_friendship(user, friend)
+                count += 1
+        # print(count)
+        # friends = []
+        # for x in self.friendships.values():
+        #     friends.append(len(x))
+        # print('average friends', sum(friends)/len(friends))
 
     def get_all_social_paths(self, user_id):
         """
@@ -59,14 +81,26 @@ class SocialGraph:
 
         The key is the friend's ID and the value is the path.
         """
+        path = [user_id]
+        q = deque([path])
         visited = {}  # Note that this is a dictionary, not a set
-        # !!!! IMPLEMENT ME
+        seen = set()
+        while q:
+            path = q.popleft()
+            id_ = path[-1]
+            if id_ not in seen:
+                seen.add(id_)
+                for friend in self.friendships[id_]:
+                    visited[id_] = path
+                    new_path = [*path, friend]
+                    q.append(new_path)
+        # print(f'Friends of {user_id}: {self.friendships[user_id]}')
         return visited
 
 
 if __name__ == '__main__':
     sg = SocialGraph()
-    sg.populate_graph(10, 2)
+    sg.populate_graph(100, 10)
     print(sg.friendships)
     connections = sg.get_all_social_paths(1)
     print(connections)
