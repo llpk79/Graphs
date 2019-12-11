@@ -38,13 +38,12 @@ class SocialGraph:
 
     def populate_graph(self, num_users, avg_friendships):
         """
-        Takes a number of users and an average number of friendships
-        as arguments
-
-        Creates that number of users and a randomly distributed friendships
+        Creates <num_user> of users and randomly distributed friendships
         between those users.
 
         The number of users must be greater than the average number of friendships.
+        :param num_users: int number of users to create
+        :param avg_friendships: int average number of friendships a user should have.
         """
         # Reset graph
         self.last_id = 0
@@ -53,58 +52,63 @@ class SocialGraph:
         if num_users <= avg_friendships:
             print("Warning! num_users must be greater than avg_friendships.")
             return
-        # Add users
+        # Add users.
         for i in range(num_users):
             self.add_user(i)
-        # Create friendships
-        count = 0
+        # Friendships come in pairs.
         friendships = (num_users * avg_friendships) // 2
-        # print('friendships', friendships)
         for _ in range(friendships):
+            # Create unique, random friendships.
             while True:
                 user = random.randint(0, self.last_id - 1)
                 friend = random.randint(0, self.last_id - 1)
+                # Be sure friendships aren't repeating.
                 if (friend != user
                         and friend not in self.friendships[user]
                         and user not in self.friendships[friend]):
                     break
             self.add_friendship(user, friend)
-            count += 1
-        # print(count)
-        # friends = []
-        # for x in self.friendships.values():
-        #     friends.append(len(x))
+        # # Check that our average is correct.
+        # friends = [len(x) for x in self.friendships.values()]
         # print('average friends', sum(friends)/len(friends))
 
     def get_all_social_paths(self, user_id):
         """
-        Takes a user's user_id as an argument
+        Use BFS to create a path from the <user_id> to all points in the extended network.
 
-        Returns a dictionary containing every user in that user's
+        :param user_id: Id of user whose extended network we want to examine.
+
+        :returns network: a dictionary containing every user in that user's
         extended network with the shortest friendship path between them.
-
         The key is the friend's ID and the value is the path.
+
         """
+        # Start the path at the given id.
         path = [user_id]
-        q = deque([path])
-        visited = {}  # Note that this is a dictionary, not a set
-        seen = set()
-        while q:
-            path = q.popleft()
+        # Populate a queue with the starting path.
+        queue = deque([path])
+        # Create a dict to track the extended network.
+        network = {}
+        while queue:
+            # Get a path from the queue.
+            path = queue.popleft()
+            # Get the last friend from the queue.
             id_ = path[-1]
-            if id_ not in seen:
-                seen.add(id_)
+            # Make sure they're not already in the network.
+            if id_ not in network:
+                # Add the friend and the path to the network.
+                network[id_] = path
+                # Find new friends to add.
                 for friend in self.friendships[id_]:
-                    visited[id_] = path
+                    # Add the new friend to the current path and add it to the queue.
                     new_path = [*path, friend]
-                    q.append(new_path)
-        # print(f'Friends of {user_id}: {self.friendships[user_id]}')
-        return visited
+                    queue.append(new_path)
+        return network
 
 
 if __name__ == '__main__':
     sg = SocialGraph()
-    sg.populate_graph(100, 10)
+    sg.populate_graph(100, 20)
     print(sg.friendships)
     connections = sg.get_all_social_paths(1)
     print(connections)
