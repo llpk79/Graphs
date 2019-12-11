@@ -2,25 +2,25 @@ from collections import deque
 
 
 def earliest_ancestor(ancestors, starting_node):
-    anc = {}
-    for a1, a2 in ancestors:
-        if a2 not in anc:
-            anc[a2] = {a1}
+    ancestor_dict = {}
+    for parent, child in ancestors:
+        if child not in ancestor_dict:
+            ancestor_dict[child] = {parent}
         else:
-            anc[a2].add(a1)
+            ancestor_dict[child].add(parent)
     path = [starting_node]
-    q = deque([path])
-    while q:
+    queue = deque([path])
+    while queue:
         parents = []
-        parent = q.popleft()[-1]
-        if parent != starting_node and parent not in anc:
+        parent = queue.popleft()[-1]
+        if parent not in ancestor_dict:
+            if parent == starting_node:
+                break
             parents.append(parent)
             continue
-        if parent not in anc:
-            break
-        for child in anc[parent]:
+        for child in ancestor_dict[parent]:
             path = [*path, child]
-            q.append(path)
+            queue.append(path)
     if parents:
         return min(parents)
     return -1
