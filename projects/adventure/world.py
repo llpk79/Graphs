@@ -5,7 +5,7 @@ import math
 
 class World:
     def __init__(self):
-        self.startingRoom = None
+        self.starting_room = None
         self.rooms = {}
         self.room_grid = []
         self.grid_size = 0
@@ -34,7 +34,7 @@ class World:
                 self.rooms[room_id].connect_rooms('e', self.rooms[room_graph[room_id][1]['e']])
             if 'w' in room_graph[room_id][1]:
                 self.rooms[room_id].connect_rooms('w', self.rooms[room_graph[room_id][1]['w']])
-        self.startingRoom = self.rooms[0]
+        self.starting_room = self.rooms[0]
 
     def print_rooms(self):
         rotated_room_grid = []

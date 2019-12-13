@@ -2,7 +2,8 @@ from collections import deque
 from room import Room
 from player import Player
 from world import World
-from graph import roomGraph
+from graph import room_graph
+from timeit import default_timer as timer
 import random
 
 # Load world
@@ -10,12 +11,12 @@ world = World()
 
 # You may uncomment the smaller graphs for development and testing purposes.
 
-world.load_graph(roomGraph)
+world.load_graph(room_graph)
 
 # UNCOMMENT TO VIEW MAP
 world.print_rooms()
 
-player = Player("Name", world.startingRoom)
+player = Player("Name", world.starting_room)
 
 
 # Fill this out
@@ -26,7 +27,7 @@ class PathFinder:
 
     def __init__(self, world: World):
         self.world = world
-        self.start = self.world.startingRoom
+        self.start = self.world.starting_room
         self.path = []
 
     @ staticmethod
@@ -101,10 +102,10 @@ class PathFinder:
                     queue.append(new_path)
 
     def traverse(self) -> list:
-        """Traverse the graph, alternating from a dft to a dead-end and a bft to a new, open path.
+        """Traverse the graph, repeatedly appending a dft path to a dead-end, then a bft backtrack to a new, open path.
 
-        1. Start the path at the start.
-        2. DFT to a dead end.
+        1. Start the main path at the starting room.
+        2. DFT to a room with no unexplored neighbors.
         3. Append that path to the main path.
         4. BFT back to nearest room with an unexplored neighbor.
         5. Append that path to the main path.
@@ -119,7 +120,6 @@ class PathFinder:
             # Create a new reference for this loop.
             main_path = self.path.copy()
 
-            # Find a dead-end.
             dft_path = self.DFT(main_path[-1])  # 2.
             main_path = [*main_path, *dft_path]  # 3.
 
@@ -131,33 +131,36 @@ class PathFinder:
             if not bft_path:
                 return [direction for _, direction in self.path[1:]]  # 7.
 
-            # Update for next loop.
             main_path = [*main_path, *bft_path]  # 5.
+            # Update for next loop.
             self.path = main_path
 
 
+then = timer()
 finder = PathFinder(world=world)
-traversalPath = finder.traverse()
-print(traversalPath)
+traversal_path = finder.traverse()
+now = timer()
+
+print(traversal_path)
 # TRAVERSAL TEST
 visited_rooms = set()
-player.currentRoom = world.startingRoom
-visited_rooms.add(player.currentRoom)
+player.current_room = world.starting_room
+visited_rooms.add(player.current_room)
 
-for move in traversalPath:
+for move in traversal_path:
     player.travel(move)
-    visited_rooms.add(player.currentRoom)
+    visited_rooms.add(player.current_room)
 
-if len(visited_rooms) == len(roomGraph):
-    print(f"TESTS PASSED: {len(traversalPath)} moves, {len(visited_rooms)} rooms visited")
+if len(visited_rooms) == len(room_graph):
+    print(f"TESTS PASSED: {len(traversal_path)} moves, {len(visited_rooms)} rooms visited in {now - then:.2f} seconds.")
 else:
     print("TESTS FAILED: INCOMPLETE TRAVERSAL")
-    print(f"{len(roomGraph) - len(visited_rooms)} unvisited rooms")
+    print(f"{len(room_graph) - len(visited_rooms)} unvisited rooms")
 
 #######
 # UNCOMMENT TO WALK AROUND
 #######
-# player.currentRoom.printRoomDescription(player)
+# player.current_room.print_room_description(player)
 # while True:
 #     cmds = input("-> ").lower().split(" ")
 #     if cmds[0] in ["n", "s", "e", "w"]:
