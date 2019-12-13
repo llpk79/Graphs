@@ -20,7 +20,7 @@ player = Player("Name", world.startingRoom)
 
 # Fill this out
 class PathFinder:
-    """Find a path that visits all rooms in <world>
+    """Find a path that visits all rooms in <world>.
 
     """
 
@@ -49,18 +49,22 @@ class PathFinder:
         path = [room]
         stack = [path]
         visited = set()
+
         while stack:
             # Get a candidate path and the last room in it.
             path = stack.pop()
             rm = path[-1][0]
+
             # Check that this room hasn't already been seen.
             if rm.id_ not in visited:
                 visited.add(rm.id_)
-                neighbors = self.get_neighbors(rm)
+
                 # If all of the neighboring rooms are on this path, this is a dead end. Return the path to this room.
+                neighbors = self.get_neighbors(rm)
                 if all([neighbor_room.id_ in [path_room.id_ for path_room, _ in path]
                         for neighbor_room, _ in neighbors]):
                     return path[1:]  # The start of this path is already a part of the main path.
+
                 # Otherwise, keep exploring this path.
                 for neighbor in neighbors:
                     # Only add neighbors that aren't yet on the main path.
@@ -75,25 +79,31 @@ class PathFinder:
         visited = set()
         queue = deque()
         queue.append(path)
+
         while queue:
             # Get a candidate path and the last room in it.
             path = queue.popleft()
             rm = path[-1][0]
+
             # Check that this room hasn't been seen.
             if rm.id_ not in visited:
                 visited.add(rm.id_)
-                neighbors = self.get_neighbors(rm)
+
                 # If any neighbor of this room is not yet on the main path, return the path to this room.
+                neighbors = self.get_neighbors(rm)
                 if any([neighbor_room.id_ not in [path_room.id_ for path_room, _ in self.path]
                         for neighbor_room, _ in neighbors]):
                     return path[1:]  # The start of this path is already a part of the main path.
+
                 # Otherwise, continue looking for a room with an unexplored neighbor.
                 for neighbor in neighbors:
                     new_path = [*path, neighbor]
                     queue.append(new_path)
 
     def traverse(self) -> list:
-        """1. Start the path at the start.
+        """Traverse the graph, alternating from a dft to a dead-end and a bft to a new, open path.
+
+        1. Start the path at the start.
         2. DFT to a dead end.
         3. Append that path to the main path.
         4. BFT back to nearest room with an unexplored neighbor.
@@ -104,6 +114,7 @@ class PathFinder:
         print('Finding path...')
         # Initialize path with a tuple (starting room, empty string).
         self.path = [(self.start, '')]  # 1.
+
         while True:  # 6.
             # Create a new reference for this loop.
             main_path = self.path.copy()
@@ -119,6 +130,7 @@ class PathFinder:
             # If BFT finds no unexplored rooms, the graph has been traversed.
             if not bft_path:
                 return [direction for _, direction in self.path[1:]]  # 7.
+
             # Update for next loop.
             main_path = [*main_path, *bft_path]  # 5.
             self.path = main_path
