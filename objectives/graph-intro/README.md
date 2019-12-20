@@ -14,7 +14,7 @@ Graphs are collections of related data. They're like trees, except connections c
 
 The nodes in a graph are called _vertexes_ (or _vertices_ or _verts_), and the connections between the verts are called _edges_.
 
-And edge denotes a relationship or linkage between the two verts.
+An edge denotes a relationship or linkage between the two verts.
 
 
 ## What can they represent?
